@@ -16,7 +16,9 @@ typedef struct HsvColor
 } HsvColor;
 
 const int SET_COLOR_MODE = 120;
-const int SET_COLORWHEEL_MODE = 115;
+const int SET_COLOR_WHEEL_MODE = 125;
+const int SET_COLOR_BREATHE_MODE = 115;
+
 const int RED_PIN = 0;
 const int GREEN_PIN = 1;
 const int BLUE_PIN = 2;
@@ -32,6 +34,7 @@ HsvColor HSV_Data;
 
 int TweenDuration = 100; // In milliseconds
 int TweenClock = 0;
+int TweenIncrementer = 1;
 int next = 0;
 
 // Initialize
@@ -53,11 +56,15 @@ void loop() {
       if(in == SET_COLOR_MODE){
         next = 1;
         Mode = SET_COLOR_MODE;
-        DigiUSB.println("Start");
-      }else if(in == SET_COLORWHEEL_MODE){
+        DigiUSB.println("Start SET_COLOR_MODE");
+      }else if(in == SET_COLOR_WHEEL_MODE){
         next = 1;
-        Mode = SET_COLORWHEEL_MODE;
-        DigiUSB.println("Start");
+        Mode = SET_COLOR_WHEEL_MODE;
+        DigiUSB.println("Start SET_COLOR_WHEEL_MODE");
+      }else if(in == SET_COLOR_BREATHE_MODE){
+        next = 1;
+        Mode = SET_COLOR_BREATHE_MODE;
+        DigiUSB.println("Start SET_COLOR_BREATHE_MODE");
       }
     }else{
       if(Mode == SET_COLOR_MODE){
@@ -85,9 +92,20 @@ void loop() {
           DigiUSB.println(in,DEC);
           next = 0;
         }
-      }else if(Mode == SET_COLORWHEEL_MODE){
+      }else if(Mode == SET_COLOR_WHEEL_MODE){
+        TweenIncrementer = 1;
         HSV_Data.h = 0;
         HSV_Data.s = 255;
+        HSV_Data.v = 255;
+        if (next == 1){
+          // Tween Duration 
+          TweenDuration = in;
+          next = 0;
+        }
+      }else if(Mode == SET_COLOR_BREATHE_MODE){
+        TweenIncrementer = 1;
+        HSV_Data.h = 255;
+        HSV_Data.s = 0;
         HSV_Data.v = 255;
         if (next == 1){
           // Tween Duration 
@@ -97,9 +115,13 @@ void loop() {
       }
     }
  }
- if(Mode == SET_COLORWHEEL_MODE){
+ 
+ if(Mode == SET_COLOR_WHEEL_MODE){
     SetColorWheelMode();
+ }else if(Mode == SET_COLOR_BREATHE_MODE){
+    SetColorBreatheMode();
  }
+ 
  // Write the RGB values to the outputs
  SetColors();
 }
@@ -125,11 +147,30 @@ void SetColorWheelMode(){
     Green = rgb.g;
     Blue = rgb.b;
     
-    HSV_Data.h += 1;
+    HSV_Data.h += TweenIncrementer;
     if (HSV_Data.h >= 255)
       HSV_Data.h = 0;
   }
 }
+
+void SetColorBreatheMode(){
+  TweenClock += 1;
+  if(TweenClock >= (TweenDuration * 6)){
+    TweenClock = 0;
+    //delay(50);
+    
+    RgbColor rgb;
+    rgb = HsvToRgb(HSV_Data);
+    Red = rgb.r;
+    Green = rgb.g;
+    Blue = rgb.b;
+    
+    HSV_Data.s += TweenIncrementer;
+    if (HSV_Data.s <= 0 || HSV_Data.s >= 255)
+      TweenIncrementer *= -1;
+  }
+}
+
 // HSV->RGB conversion based on GLSL version
 RgbColor HsvToRgb(HsvColor hsv)
 {
