@@ -104,12 +104,18 @@ void loop() {
         }
       }else if(Mode == SET_COLOR_BREATHE_MODE){
         TweenIncrementer = 1;
-        HSV_Data.h = 255;
         HSV_Data.s = 0;
-        HSV_Data.v = 255;
         if (next == 1){
           // Tween Duration 
           TweenDuration = in;
+          next = 2;
+        }else if (next == 2){
+          // HSV Hue 
+          HSV_Data.h = constrain(in, 0, 255);
+          next = 3;
+        }else if (next == 3){
+          // HSV Value 
+          HSV_Data.v = constrain(in, 0, 255);
           next = 0;
         }
       }
