@@ -16,8 +16,8 @@ typedef struct HsvColor
 } HsvColor;
 
 const int SET_COLOR_MODE = 120;
-const int SET_COLOR_WHEEL_MODE = 125;
-const int SET_COLOR_BREATHE_MODE = 115;
+const int SET_COLOR_WHEEL_MODE = 115;
+const int SET_COLOR_BREATHE_MODE = 125;
 
 const int RED_PIN = 0;
 const int GREEN_PIN = 1;
@@ -43,6 +43,9 @@ void setup() {
   pinMode(RED_PIN,OUTPUT);
   pinMode(GREEN_PIN,OUTPUT);
   pinMode(BLUE_PIN,OUTPUT);
+  
+  // initialize digital pin LED_BUILTIN as an output.
+  pinMode(LED_BUILTIN, OUTPUT);
 }
 
 // Code Loop
@@ -134,11 +137,12 @@ void loop() {
 
 // We make a software simulated PWM
 void SetColors(){
-    for (int x=0;x<=255;x++){
-      digitalWrite(RED_PIN,(Red > x)? HIGH : LOW);
-      digitalWrite(GREEN_PIN,(Green > x)? HIGH : LOW);
-      digitalWrite(BLUE_PIN,(Blue > x)? HIGH : LOW);
-    } 
+  digitalWrite(LED_BUILTIN, LOW);    // turn the Internal LED off 
+  for (int x=0;x<=255;x++){
+    digitalWrite(RED_PIN,(Red > x)? HIGH : LOW);
+    digitalWrite(GREEN_PIN,(Green > x)? HIGH : LOW);
+    digitalWrite(BLUE_PIN,(Blue > x)? HIGH : LOW);
+  } 
 }
  
 void SetColorWheelMode(){
